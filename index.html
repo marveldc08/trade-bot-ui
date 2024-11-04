@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" >
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DC Bot | Login</title>
+
+    </head>
+    <body>
+        <form id="botForm">
+            <input type="text" name="account" placeholder="Exness Account Number" required>
+            <input type="password" name="password" placeholder="Exness Password" required>
+            <input type="text" name="server" placeholder="Exness Server" required>
+            <button type="submit">Start Bot</button>
+        </form>
+
+        <script>
+            const backendUrl = 'http://127.0.0.1:5000';
+
+            document.getElementById('botForm').addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                console.log(data)
+
+                const response = await fetch(`${backendUrl}/main.py`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                alert(result.status);
+            });
+
+        </script>
+
+    </body>
+</html>
