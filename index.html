@@ -15,7 +15,7 @@
         </form>
 
         <script>
-            const backendUrl = 'http://127.0.0.1:5000';
+            const backendUrl = 'https://first-trade-bot.vercel.app';
 
             document.getElementById('botForm').addEventListener('submit', async function(event) {
                 event.preventDefault();
@@ -23,7 +23,7 @@
                 const data = Object.fromEntries(formData.entries());
                 console.log(data)
 
-                const response = await fetch(`${backendUrl}/main.py`, {
+                const response = await fetch(`${backendUrl}/start-bot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
