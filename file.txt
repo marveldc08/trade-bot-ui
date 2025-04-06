@@ -1,0 +1,70 @@
+from strategies.strategy import TradingStrategy
+from flask import Flask, request
+import MetaTrader5 as mt5
+import logging
+import os
+from dotenv import load_dotenv
+
+
+app = Flask(__name__)
+# Configure logging
+LOG_DIR = 'logs'
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s [%(name)s] %(message)s',
+    handlers=[
+        logging.FileHandler(f"{LOG_DIR}/trading_bot.log"),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+load_dotenv()
+
+
+# account = os.getenv("ACCOUNT")
+# password = os.getenv("PASSWORD")
+# server = os.getenv("SERVER")
+
+
+@app.route('/main', methods=['POST'])
+def initialize_mt5():
+    # Initialize MT5
+    if not mt5.initialize():
+        print("Failed to initialize MT5")
+        print(f"Error: {mt5.last_error()}")
+        return False
+    else:
+        print("MT5 initialized successfully")
+    
+    # Log in to the Exness account
+    data = request.json
+    print(data)
+    account = data['account']
+    password = data['password']
+    server = data['server']
+
+
+    if not mt5.login(account, password, server):
+        logger.error(f"Failed to login to Exness account!!! {account}")
+        mt5.shutdown()
+        return False
+
+    logger.info(f"Successfully logged in to Exness account {account}")
+    return True
+
+if __name__ == "__main__":
+    logger.info("Starting trading bot")
+
+    if initialize_mt5():
+        symbols = ["EURUSDm", "GBPUSDm", "USDJPYm"]
+        trading_bot = TradingStrategy(account, password, server, symbols)
+        trading_bot.run()  # Start the trading bot
+
+        mt5.shutdown()
+        logger.info("MT5 shutdown completed")
+    else:
+        logger.error("Trading bot could not be started due to MT5 initialization failure")
